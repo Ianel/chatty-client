@@ -1,11 +1,10 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
 
-// Get all the elements
-
-const chatContainer = document.querySelector(".chat-container");
 const chatInput = document.querySelector("#chat-input");
 const sendBtn = document.querySelector("#send-button");
 const chatBox = document.querySelector("#chat-box");
+
+const API_URL = "https://chatty-server-fy92.onrender.com/content";
 
 const appendMessage = (message, speaker) => {
     const messageElement = document.createElement("div");
@@ -19,7 +18,7 @@ const appendMessage = (message, speaker) => {
 };
 
 const getResponse = async (prompt) => {
-    const response = await fetch("http://localhost:3000/content", {
+    const response = await fetch(API_URL, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -50,9 +49,10 @@ sendBtn.addEventListener("click", async (e) => {
     sendBtn.disabled = true;
     sendBtn.style.cursor = "not-allowed";
     sendBtn.innerHTML = "Envoi en cours...";
+
     const prompt = await getResponse(message);
-    console.log({ prompt });
     appendMessage(prompt, "bot");
+
     sendBtn.disabled = false;
     sendBtn.style.cursor = "pointer";
     sendBtn.innerHTML = "Envoyer";
