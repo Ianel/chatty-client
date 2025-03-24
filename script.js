@@ -12,7 +12,7 @@ const sidebar = document.getElementById("sidebar");
 const mainContainer = document.getElementById("main-container");
 
 // Configuration de l'API
-const BASE_URL = "http://chatty.ophiris.com";
+const BASE_URL = "https://chatty.ophiris.com";
 
 const API_URL = `${BASE_URL}/content`;
 
