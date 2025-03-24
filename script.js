@@ -16,6 +16,17 @@ const BASE_URL = "https://chatty.ophiris.com";
 
 const API_URL = `${BASE_URL}/content`;
 
+// Headers pour les requêtes
+let headers = new Headers();
+
+headers.append("Content-Type", "application/json");
+headers.append("Accept", "application/json");
+
+headers.append("Access-Control-Allow-Origin", "*");
+headers.append("Access-Control-Allow-Credentials", "true");
+
+headers.append("GET", "POST", "OPTIONS");
+
 // État de la session
 let sessionId = null;
 
@@ -62,9 +73,7 @@ async function getResponse(prompt) {
     try {
         const response = await fetch(API_URL, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: headers,
             body: JSON.stringify({ prompt, sessionId }),
         });
 
