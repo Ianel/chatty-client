@@ -8,11 +8,131 @@ html {
     scroll-behavior: smooth;
 }
 
+/* Conteneur principal */
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 25%;
+    background-color: #f4f4f9;
+    border-right: 1px solid #ddd;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.sidebar h2 {
+    font-size: 20px;
+    color: #4a90e2;
+    margin-bottom: 10px;
+}
+
+#session-list {
+    list-style: none;
+    padding: 0;
+}
+
+#session-list li {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    background-color: #fff;
+    transition: background-color 0.3s;
+}
+
+#session-list li:hover {
+    background-color: #f0f0f0;
+}
+
+/* Bouton Nouvelle Session */
+#new-session-button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #4a90e2;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: center;
+}
+
+#new-session-button:hover {
+    background-color: #357abd;
+}
+
+/* Chat container */
 .chat-container {
-    position: relative;
-    padding: 30px;
-    min-height: 100vh;
-    background-color: #f7f5f3;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background: #fff;
+}
+
+.chat-box {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    margin-bottom: 10px;
+}
+
+.message {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 80%;
+    word-wrap: break-word;
+}
+
+.message.sent {
+    background-color: #d1e7dd;
+    align-self: flex-end;
+    text-align: right;
+}
+
+.message.received {
+    background-color: #f8d7da;
+    align-self: flex-start;
+    text-align: left;
+}
+
+#chat-form {
+    display: flex;
+    gap: 10px;
+}
+
+#chat-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    resize: none;
+    font-size: 14px;
+}
+
+#send-button {
+    padding: 10px 20px;
+    background-color: #4a90e2;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#send-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 
 .main-title {
