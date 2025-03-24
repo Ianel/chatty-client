@@ -12,10 +12,7 @@ const sidebar = document.getElementById("sidebar");
 const mainContainer = document.getElementById("main-container");
 
 // Configuration de l'API
-const BASE_URL =
-    window.location.hostname == "127.0.0.1"
-        ? "http://localhost:3000"
-        : "https://chatty.ophiris.com";
+const BASE_URL = "https://chatty.ophiris.com";
 
 const API_URL = `${BASE_URL}/content`;
 
