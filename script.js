@@ -20,9 +20,7 @@ const API_URL = `${BASE_URL}/content`;
 let headers = new Headers();
 
 headers.append("Content-Type", "application/json");
-headers.append("Accept", "application/json");
-
-headers.append("Access-Control-Allow-Origin", "*");
+headers.append("Accept", "/");
 
 // État de la session
 let sessionId = null;
