@@ -15,7 +15,7 @@ const mainContainer = document.getElementById("main-container");
 const BASE_URL =
     window.location.hostname == "127.0.0.1"
         ? "http://localhost:3000"
-        : "https://chatty-server-fy92.onrender.com";
+        : "https://chatty.ophiris.com";
 
 const API_URL = `${BASE_URL}/content`;
 
