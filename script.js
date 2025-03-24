@@ -102,7 +102,12 @@ async function fetchSessions() {
     try {
         const url = `${BASE_URL}/sessions`;
 
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
 
         if (!response.ok) {
             throw new Error(`Erreur HTTP! Statut: ${response.status}`);
@@ -120,7 +125,13 @@ async function fetchSessions() {
 async function fetchMessages(selectedSessionId) {
     try {
         const response = await fetch(
-            `${BASE_URL}/sessions/${selectedSessionId}/messages`
+            `${BASE_URL}/sessions/${selectedSessionId}/messages`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
         );
 
         if (!response.ok) {
