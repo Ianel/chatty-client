@@ -1,156 +1,269 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
 
-const chatInput = document.querySelector("#chat-input");
-const sendBtn = document.querySelector("#send-button");
-const chatBox = document.querySelector("#chat-box");
-const sessionList = document.querySelector("#session-list");
-const newSessionButton = document.querySelector("#new-session-button");
+// Éléments DOM
+const chatInput = document.getElementById("chat-input");
+const sendBtn = document.getElementById("send-button");
+const chatBox = document.getElementById("chat-box");
+const chatForm = document.getElementById("chat-form");
+const newSessionButton = document.getElementById("new-session-button");
+const toggleSidebar = document.getElementById("toggle-sidebar");
+const closeSidebar = document.getElementById("close-sidebar");
+const sidebar = document.getElementById("sidebar");
+const mainContainer = document.getElementById("main-container");
 
-//const API_URL = "https://chatty-server-fy92.onrender.com/content";
+// Configuration de l'API
+const BASE_URL =
+    window.location.hostname == "127.0.0.1"
+        ? "http://localhost:3000"
+        : "https://chatty-server-fy92.onrender.com";
 
-const API_URL = "http://localhost:3000/content";
+const API_URL = `${BASE_URL}/content`;
 
-// Stocker le sessionId pour maintenir la mémoire de la conversation
+// État de la session
 let sessionId = null;
 
-const appendMessage = (message, speaker) => {
+// ===== Fonctions de gestion du sidebar =====
+function handleSidebarToggle() {
+    if (window.innerWidth <= 768) {
+        // En mode mobile, on ouvre/ferme complètement le sidebar
+        sidebar.classList.toggle("open");
+    } else {
+        // En mode desktop, on collapse/expand le sidebar
+        mainContainer.classList.toggle("sidebar-collapsed");
+    }
+}
+
+function handleCloseSidebar() {
+    if (window.innerWidth <= 768) {
+        sidebar.classList.remove("open");
+    }
+}
+
+// ===== Fonctions de chat =====
+function appendMessage(message, speaker) {
     const messageElement = document.createElement("div");
-    messageElement.innerHTML = `<div>${marked.parse(message)}</div>`;
     messageElement.classList.add("message");
-    speaker == "user"
-        ? messageElement.classList.add("sent")
-        : messageElement.classList.add("received");
-    chatBox.append(messageElement);
-    window.scrollTo(0, document.body.scrollHeight);
-};
 
-const getResponse = async (prompt) => {
-    const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt, sessionId }), // Inclure le sessionId dans la requête
-    });
-
-    if (!response.ok) {
-        throw new Error("Failed to get response");
+    if (speaker === "user") {
+        messageElement.classList.add("sent");
+        messageElement.innerHTML = `
+            <div class="avatar">IT</div>
+            <div class="content">${message}</div>
+        `;
+    } else {
+        messageElement.classList.add("received");
+        messageElement.innerHTML = `
+            <div class="content">${marked.parse(message)}</div>
+        `;
     }
 
-    const result = await response.json();
+    chatBox.appendChild(messageElement);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
 
-    // Mettre à jour le sessionId si ce n'est pas déjà défini
-    if (!sessionId) {
-        sessionId = result.sessionId;
-    }
-
-    return result.response; // Retourner la réponse générée par le bot
-};
-
-// Fonction pour démarrer une nouvelle session
-const startNewSession = () => {
-    sessionId = null; // Réinitialiser l'ID de la session
-    chatBox.innerHTML = ""; // Réinitialiser la boîte de chat
-    alert("Nouvelle session démarrée !");
-    fetchSessions(); // Mettre à jour l'historique des sessions
-};
-
-// Fonction pour récupérer l'historique des sessions
-const fetchSessions = async () => {
+async function getResponse(prompt) {
     try {
-        const response = await fetch("http://localhost:3000/sessions");
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ prompt, sessionId }),
+        });
+
         if (!response.ok) {
-            throw new Error("Failed to fetch sessions");
+            throw new Error(`Erreur HTTP! Statut: ${response.status}`);
         }
+
+        const result = await response.json();
+
+        // Mettre à jour le sessionId si ce n'est pas déjà défini
+        if (!sessionId) {
+            sessionId = result.sessionId;
+        }
+
+        return result.response;
+    } catch (error) {
+        console.error("Erreur lors de l'obtention de la réponse:", error);
+        throw error;
+    }
+}
+
+// ===== Fonctions de gestion des sessions =====
+function startNewSession() {
+    sessionId = null;
+    chatBox.innerHTML = "";
+    fetchSessions();
+
+    // Fermer le sidebar en mode mobile après avoir créé une nouvelle session
+    if (window.innerWidth <= 768) {
+        handleCloseSidebar();
+    }
+}
+
+async function fetchSessions() {
+    try {
+        const url = `${BASE_URL}/sessions`;
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP! Statut: ${response.status}`);
+        }
+
         const result = await response.json();
         if (result.success) {
             updateSessionList(result.sessions);
         }
     } catch (error) {
-        console.error("Error fetching sessions:", error);
+        console.error("Erreur lors de la récupération des sessions:", error);
     }
-};
+}
 
-// Fonction pour récupérer les messages d'une session
-const fetchMessages = async (sessionId) => {
+async function fetchMessages(selectedSessionId) {
     try {
         const response = await fetch(
-            `http://localhost:3000/sessions/${sessionId}/messages`
+            `${BASE_URL}/sessions/${selectedSessionId}/messages`
         );
+
         if (!response.ok) {
-            throw new Error("Failed to fetch messages");
+            throw new Error(`Erreur HTTP! Statut: ${response.status}`);
         }
+
         const result = await response.json();
         if (result.success) {
             displayMessages(result.messages);
         }
     } catch (error) {
-        console.error("Error fetching messages:", error);
+        console.error("Erreur lors de la récupération des messages:", error);
     }
-};
+}
 
-// Afficher les messages dans la boîte de chat
-const displayMessages = (messages) => {
-    chatBox.innerHTML = ""; // Réinitialiser la boîte de chat
+function displayMessages(messages) {
+    chatBox.innerHTML = "";
+
     messages.forEach((message) => {
         const messageElement = document.createElement("div");
         messageElement.classList.add("message");
-        messageElement.classList.add(
-            message.sender === "user" ? "sent" : "received"
-        );
-        messageElement.innerHTML = `<div>${marked.parse(
-            message.message
-        )}</div>`;
+
+        if (message.sender === "user") {
+            messageElement.classList.add("sent");
+            messageElement.innerHTML = `
+                <div class="avatar">IT</div>
+                <div class="content">${message.message}</div>
+            `;
+        } else {
+            messageElement.classList.add("received");
+            messageElement.innerHTML = `
+                <div class="content">${marked.parse(message.message)}</div>
+            `;
+        }
+
         chatBox.appendChild(messageElement);
     });
-};
 
-// Mettre à jour la liste des sessions dans la sidebar
-const updateSessionList = (sessions) => {
+    // Faire défiler jusqu'au dernier message
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function updateSessionList(sessions) {
+    const sessionList = document.getElementById("session-list");
     sessionList.innerHTML = "";
+
     sessions.forEach((session) => {
         const listItem = document.createElement("li");
+        listItem.classList.add("session-item");
         listItem.textContent = `Session - ${new Date(
             session.created_at
         ).toLocaleString()}`;
+
         listItem.addEventListener("click", () => {
-            sessionId = session.session_id; // Charger cette session
-            fetchMessages(session.session_id); // Charger les messages de la session
+            // Enlever la classe active de tous les items
+            document.querySelectorAll(".session-item").forEach((item) => {
+                item.classList.remove("active");
+            });
+
+            // Ajouter la classe active à l'item cliqué
+            listItem.classList.add("active");
+            sessionId = session.session_id;
+            fetchMessages(session.session_id);
+
+            // Fermer le sidebar en mode mobile après sélection d'une session
+            if (window.innerWidth <= 768) {
+                handleCloseSidebar();
+            }
         });
+
         sessionList.appendChild(listItem);
     });
-};
+}
 
-// Charger les sessions au démarrage
-fetchSessions();
+// ===== Initialisation et écouteurs d'événements =====
+// Ajuster la hauteur du textarea automatiquement
+chatInput.addEventListener("input", function () {
+    this.style.height = "auto";
+    this.style.height = this.scrollHeight + "px";
 
-// Écouter le clic sur le bouton Nouvelle Session
-newSessionButton.addEventListener("click", startNewSession);
+    if (this.scrollHeight > 150) {
+        this.style.height = "150px";
+    }
+});
 
-sendBtn.addEventListener("click", async (e) => {
+// Écouteur pour le bouton d'envoi
+chatForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const message = chatInput.value;
+    const message = chatInput.value.trim();
 
     if (!message) {
-        alert("Veuillez entrer un message");
         return;
     }
 
     appendMessage(message, "user");
     chatInput.value = "";
+    chatInput.style.height = "auto";
+
+    // Afficher l'état de chargement
     sendBtn.disabled = true;
-    sendBtn.style.cursor = "not-allowed";
-    sendBtn.innerHTML = "Envoi en cours...";
+    sendBtn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i>";
 
     try {
-        const prompt = await getResponse(message);
-        appendMessage(prompt, "bot");
+        const response = await getResponse(message);
+        appendMessage(response, "bot");
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Erreur:", error);
         alert("Une erreur est survenue lors de l'envoi du message.");
     } finally {
         sendBtn.disabled = false;
-        sendBtn.style.cursor = "pointer";
-        sendBtn.innerHTML = "Envoyer";
+        sendBtn.innerHTML = "<i class='fa-solid fa-arrow-up'></i>";
     }
+});
+
+// Soumettre le formulaire avec Enter, nouvelle ligne avec Shift+Enter
+chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendBtn.click();
+    }
+});
+
+// Écouteurs pour le sidebar
+toggleSidebar.addEventListener("click", handleSidebarToggle);
+closeSidebar.addEventListener("click", handleCloseSidebar);
+
+// Écouteur pour nouvelle session
+newSessionButton.addEventListener("click", startNewSession);
+
+// Écouteur pour le redimensionnement de la fenêtre
+window.addEventListener("resize", () => {
+    // Réinitialiser l'état du sidebar lors du changement de taille
+    if (window.innerWidth > 768) {
+        sidebar.classList.remove("open");
+        // Réinitialiser la position left au cas où
+        sidebar.style.left = "";
+    }
+});
+
+// Initialisation de l'application
+window.addEventListener("DOMContentLoaded", () => {
+    fetchSessions();
 });

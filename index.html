@@ -3,30 +3,67 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Chatbot</title>
+        <title>Chatty</title>
         <link rel="stylesheet" href="style.css" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
     </head>
     <body>
-        <div class="container">
+        <div class="container" id="main-container">
             <!-- Sidebar pour l'historique des sessions -->
             <div class="sidebar" id="sidebar">
-                <h2>Historique</h2>
-                <button id="new-session-button">Nouvelle Session</button>
-                <ul id="session-list"></ul>
+                <div class="claude-header">
+                    <div class="claude-title">Chatty</div>
+                    <div class="back-button" id="close-sidebar">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button id="new-session-button">
+                        <i class="fa-solid fa-plus"></i> Nouvelle discussion
+                    </button>
+                </div>
+                <div class="recents-header">
+                    <div>Récents</div>
+                </div>
+                <ul id="session-list">
+                    <!-- Sessions added dynamically -->
+                </ul>
             </div>
 
             <!-- Zone principale du chatbot -->
             <div class="chat-container">
-                <h1 class="main-title">Chatty</h1>
-                <div class="chat-box" id="chat-box"></div>
-                <form id="chat-form">
-                    <textarea
-                        id="chat-input"
-                        placeholder="Entrer un message..."
-                        rows="2"
-                    ></textarea>
-                    <button id="send-button" type="submit">Envoyer</button>
-                </form>
+                <div class="chat-header">
+                    <button id="toggle-sidebar" class="sidebar-toggle-btn">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="chat-title">Discussion</div>
+                </div>
+
+                <div class="chat-box" id="chat-box">
+                    <!-- Messages added dynamically -->
+                </div>
+
+                <div class="chat-input-container">
+                    <form id="chat-form">
+                        <div class="chat-input-wrapper">
+                            <textarea
+                                id="chat-input"
+                                placeholder="Entrer un message..."
+                            ></textarea>
+                            <div class="input-actions">
+                                <button id="send-button" type="submit">
+                                    <i class="fa-solid fa-arrow-up"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="model-info">
+                            <span>Gemini 2.0 Flash</span>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
